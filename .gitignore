@@ -1,0 +1,11 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/.idea
+/.vs
+/__pycache__
+/SimulatedDevice.py
+/Essentials_SenseHAT_v1.pdf
+/src/__pycache__
+/src/PicoDisplayDemos/.vscode
