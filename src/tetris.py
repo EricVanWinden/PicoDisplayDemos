@@ -97,9 +97,6 @@ last_fall_time = time.ticks_ms()
 FALL_INTERVAL = 600  # ms
 
 
-# --- Helpers ---
-
-
 def new_piece():
     global current_piece, current_shape, current_rot, current_x, current_y
     current_piece = random.choice(list(TETROMINOS.keys()))
@@ -164,9 +161,6 @@ def reset_game():
     new_piece()
 
 
-# --- Drawing ---
-
-
 def clear_screen():
     r, g, b = BG_COLOR
     display.set_pen(display.create_pen(r, g, b))
@@ -220,9 +214,6 @@ def update_led():
         led.set_rgb(0, 40, 0)
 
 
-# --- Input handling ---
-
-
 def handle_input():
     global current_x, current_y, current_rot, game_over
 
@@ -263,7 +254,25 @@ def handle_input():
         time.sleep(0.1)
 
 
-# --- Main game loop ---
+def get_ghost_y():
+    gy = current_y
+    while valid_position(current_x, gy + 1, current_rot):
+        gy += 1
+    return gy
+
+
+def draw_ghost_piece():
+    gy = get_ghost_y()
+    cells = get_cells(current_piece, current_shape, current_rot, current_x, gy)
+    ghost_pen = display.create_pen(255, 255, 255)
+
+    for (x, y) in cells:
+        if y < 0:
+            continue
+        rx = OFFSET_X + x * CELL_SIZE
+        ry = OFFSET_Y + y * CELL_SIZE
+        display.set_pen(ghost_pen)
+        display.rectangle(rx + 1, ry + 1, CELL_SIZE - 3, CELL_SIZE - 3)
 
 
 def main():
@@ -291,6 +300,7 @@ def main():
         clear_screen()
         draw_board()
         if not game_over:
+            draw_ghost_piece()
             draw_current_piece()
         draw_ui()
         update_led()
