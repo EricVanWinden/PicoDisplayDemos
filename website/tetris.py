@@ -1,20 +1,34 @@
 import time
 import random
-from pimoroni import Button, RGBLED
-from picographics import PicoGraphics, DISPLAY_PICO_DISPLAY
+from web_graphics import WebGraphics
+from web_button import WebButton
+from web_display import start_web_display
+from rgb_led import RGBLED
 
-# --- Hardware setup ---
-display = PicoGraphics(display=DISPLAY_PICO_DISPLAY, rotate=270)
-display.set_backlight(0.6)
+if not hasattr(time, "ticks_ms"):
+    def ticks_ms():
+        return int(time.monotonic() * 1000)
 
-button_a = Button(12)  # rotate
-button_b = Button(13)  # soft drop
-button_x = Button(14)  # left
-button_y = Button(15)  # right
+
+    time.ticks_ms = ticks_ms
+
+if not hasattr(time, "ticks_diff"):
+    def ticks_diff(end, start):
+        return end - start
+
+
+    time.ticks_diff = ticks_diff
+
+start_web_display()
+
+display = WebGraphics(rotate=0)
+button_a = WebButton("a")
+button_b = WebButton("b")
+button_x = WebButton("x")
+button_y = WebButton("y")
 
 led = RGBLED(6, 7, 8)
 
-# --- Game constants ---
 BOARD_WIDTH = 10
 BOARD_HEIGHT = 20
 
@@ -156,7 +170,7 @@ def clear_lines():
         score += 300
     if cleared == 4:
         score += 1200
-        
+
     return cleared
 
 

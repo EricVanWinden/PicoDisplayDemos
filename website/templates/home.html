@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Pico Display Debugger</title>
+<style>
+  body { background:#222; color:white; font-family:sans-serif; }
+  canvas { background:black; border:1px solid #555; }
+  button { margin:5px; padding:10px; }
+</style>
+</head>
+<body>
+<h2>Pico Display Debugger</h2>
+<canvas id="screen" width="135" height="240"></canvas><br>
+
+<button onclick="press('y')">Y</button>
+<button onclick="press('x')">X</button>
+<button onclick="press('a')">A</button>
+<button onclick="press('b')">B</button>
+
+<script>
+async function update() {
+    const res = await fetch('/frame');
+    const data = await res.json();
+
+    const ctx = document.getElementById('screen').getContext('2d');
+
+    for (const cmd of data) {
+        if (cmd.cmd === "clear") {
+            ctx.fillStyle = "black";
+            ctx.fillRect(0,0,240,135);
+        }
+        if (cmd.cmd === "rect") {
+            const c = cmd.color;
+            ctx.fillStyle = `rgb(${c[0]},${c[1]},${c[2]})`;
+            ctx.fillRect(cmd.x, cmd.y, cmd.w, cmd.h);
+        }
+        if (cmd.cmd === "text") {
+            const c = cmd.color;
+            ctx.fillStyle = `rgb(${c[0]},${c[1]},${c[2]})`;
+            ctx.font = `${8 * cmd.scale}px monospace`;
+            ctx.textBaseline = "top"
+            ctx.fillText(cmd.text, cmd.x, cmd.y);
+        }
+    }
+}
+
+async function press(btn) {
+    await fetch('/button/' + btn + '/down');
+    setTimeout(() => fetch('/button/' + btn + '/up'), 150);
+}
+
+document.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowLeft")  press("y");   // button_y
+    if (e.key === "ArrowRight") press("x");   // button_x
+    if (e.key === "ArrowUp")    press("a");   // button_a
+    if (e.key === "ArrowDown")  press("b");   // button_b
+});
+
+document.addEventListener("keyup", (e) => {
+    if (e.key === "ArrowLeft")  release("y");
+    if (e.key === "ArrowRight") release("x");
+    if (e.key === "ArrowUp")    release("a");
+    if (e.key === "ArrowDown")  release("b");
+});
+
+async function release(btn) {
+    await fetch('/button/' + btn + '/up');
+}
+
+setInterval(update, 50);
+</script>
+</body>
+</html>
